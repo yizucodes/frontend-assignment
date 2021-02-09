@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Radio, RadioChangeEvent } from 'antd';
 import FilterByName from './FilterByName';
 import FilterByType from './FilterByType';
+import FilterPoke from './FilterPoke';
 
 function FilterWrapper() {
-  const [filterType, setFilterType] = useState<string>('byName');
+  const [filterType, setFilterType] = useState<string>('byType');
   const onRadioChange = (event: RadioChangeEvent) => {
     setFilterType(event.target.value);
   };
@@ -12,7 +13,7 @@ function FilterWrapper() {
     <>
       <div style={{ paddingBottom: 20 }}>
         <Radio.Group
-          defaultValue='byName'
+          defaultValue='byType'
           buttonStyle='solid'
           onChange={onRadioChange}
         >
@@ -20,8 +21,9 @@ function FilterWrapper() {
           <Radio.Button value='byType'>Type</Radio.Button>
         </Radio.Group>
       </div>
-      {filterType === 'byName' && <FilterByName />}
-      {filterType === 'byType' && <FilterByType />}
+      {/* {filterType === 'byName' && <FilterByName />}
+      {filterType === 'byType' && <FilterByType />} */}
+      <FilterPoke filterType={filterType} />
     </>
   );
 }
