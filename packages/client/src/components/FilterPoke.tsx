@@ -17,9 +17,59 @@ function FilterPoke({ filterType }: FilterPokeProps) {
   const [selType, setSelType] = useState<string>('Normal');
   const [searchText, setSearchText] = useState<string>('');
 
-  const { loading, error, data, fetchMore } = useQuery(FILTER_TYPE_QUERY, {
-    variables: { type: selType },
-  });
+  // const FILTER_QUERY = () => {
+  //   let query = filterType === 'byName' ? `"${searchText}"` : `"${selType}"`;
+
+  //   const queryParams =
+  //     filterType === 'byName'
+  //       ? `pokemons(q:${query})`
+  //       : `pokemonsByType(type:${query})`;
+
+  //   return gql`
+  //   query filterType($q: String, $type: String){
+  //     ${queryParams}{
+
+  //     edges{
+  //       node{
+  //         name
+  //         types
+  //         id
+  //         classification
+  //       }
+  //     }
+  //     pageInfo{
+  //       hasNextPage
+  //       endCursor
+  //     }
+  //   }}
+  //   `;
+  // };
+
+  const FILTER_QUERY = () => {
+    let query = `"${selType}"`;
+
+    const queryParams = `pokemonsByType(type:${query}`;
+
+    return gql`{
+      ${queryParams}){ 
+  
+      edges{
+        node{
+          name
+          types
+          id
+          classification
+        }
+      }
+      pageInfo{
+        hasNextPage
+        endCursor
+      }
+    }}
+    `;
+  };
+
+  const { loading, error, data, fetchMore } = useQuery(FILTER_QUERY());
 
   // Using a variable to conditionally render Show More button because with state I get error:
   // Too many re-renders. React limits the number of renders to prevent an infinite loop.”
@@ -27,6 +77,7 @@ function FilterPoke({ filterType }: FilterPokeProps) {
 
   let pokemon;
   if (loading === false) {
+    console.log(data);
     if (data.pokemonsByType.pageInfo.hasNextPage) {
       isMore = true;
     }
