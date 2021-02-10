@@ -4,7 +4,6 @@ import { useQuery } from '@apollo/react-hooks';
 import PokeTable from './PokeTable';
 import { pokeTypes } from '../constants';
 import { PokemonEdge } from '../Types';
-import { FILTER_TYPE_QUERY } from '../Queries';
 import { gql } from 'apollo-boost';
 
 const { Option } = Select;
@@ -17,41 +16,22 @@ function FilterPoke({ filterType }: FilterPokeProps) {
   const [selType, setSelType] = useState<string>('Normal');
   const [searchText, setSearchText] = useState<string>('');
 
-  // const FILTER_QUERY = () => {
-  //   let query = filterType === 'byName' ? `"${searchText}"` : `"${selType}"`;
-
-  //   const queryParams =
-  //     filterType === 'byName'
-  //       ? `pokemons(q:${query})`
-  //       : `pokemonsByType(type:${query})`;
-
-  //   return gql`
-  //   query filterType($q: String, $type: String){
-  //     ${queryParams}{
-
-  //     edges{
-  //       node{
-  //         name
-  //         types
-  //         id
-  //         classification
-  //       }
-  //     }
-  //     pageInfo{
-  //       hasNextPage
-  //       endCursor
-  //     }
-  //   }}
-  //   `;
-  // };
-
   const FILTER_QUERY = () => {
-    let query = `"${selType}"`;
+    let query = filterType === 'byType' ? `"${selType}"` : `"${searchText}"`;
+    // let query = `"${selType}"`;
+    console.log('query', query);
 
-    const queryParams = `pokemonsByType(type:${query}`;
+    const queryParams =
+      filterType === 'byName'
+        ? `pokemons(q:${query})`
+        : `pokemonsByType(type:${query})`;
+
+    // const queryParams = `pokemonsByType(type:${query})`;
+
+    console.log('queryParams', queryParams);
 
     return gql`{
-      ${queryParams}){ 
+      ${queryParams}{ 
   
       edges{
         node{
@@ -68,7 +48,7 @@ function FilterPoke({ filterType }: FilterPokeProps) {
     }}
     `;
   };
-
+  console.log('filterType', filterType);
   const { loading, error, data, fetchMore } = useQuery(FILTER_QUERY());
 
   // Using a variable to conditionally render Show More button because with state I get error:
@@ -76,13 +56,18 @@ function FilterPoke({ filterType }: FilterPokeProps) {
   let isMore: boolean = false;
 
   let pokemon;
-  if (loading === false) {
-    console.log(data);
-    if (data.pokemonsByType.pageInfo.hasNextPage) {
-      isMore = true;
-    }
 
-    pokemon = data.pokemonsByType.edges.map((edge: PokemonEdge) => {
+  if (loading === false) {
+    // const pokemonData = data.pokemonsByType;
+
+    const pokemonData =
+      filterType === 'byType' ? data.pokemonsByType : data.pokemons;
+    console.log('pokemonData', pokemonData);
+    // if (pokemonData.pageInfo.hasNextPage) {
+    //   isMore = true;
+    // }
+
+    pokemon = pokemonData.edges.map((edge: PokemonEdge) => {
       return {
         key: edge.node.id,
         name: edge.node.name,
@@ -96,20 +81,20 @@ function FilterPoke({ filterType }: FilterPokeProps) {
     setSelType(selectedValue);
   }
 
-  const handleLoadMore = () => {
-    const { endCursor } = data.pokemonsByType.pageInfo;
+  // const handleLoadMore = () => {
+  //   const { endCursor } = data.pokemonsByType.pageInfo;
 
-    fetchMore({
-      variables: { after: endCursor },
-      updateQuery: (prevResult: any, { fetchMoreResult }) => {
-        fetchMoreResult.pokemonsByType.edges = [
-          ...prevResult.pokemonsByType.edges,
-          ...fetchMoreResult.pokemonsByType.edges,
-        ];
-        return fetchMoreResult;
-      },
-    });
-  };
+  //   fetchMore({
+  //     variables: { after: endCursor },
+  //     updateQuery: (prevResult: any, { fetchMoreResult }) => {
+  //       fetchMoreResult.pokemonsByType.edges = [
+  //         ...prevResult.pokemonsByType.edges,
+  //         ...fetchMoreResult.pokemonsByType.edges,
+  //       ];
+  //       return fetchMoreResult;
+  //     },
+  //   });
+  // };
 
   return (
     <>
@@ -141,7 +126,7 @@ function FilterPoke({ filterType }: FilterPokeProps) {
       <div className='PokeTable'>
         <PokeTable pokemons={pokemon} error={error} loading={loading} />
       </div>
-      {isMore && <Button onClick={handleLoadMore}>Show More</Button>}
+      {/* {isMore && <Button onClick={handleLoadMore}>Show More</Button>} */}
     </>
   );
 }
