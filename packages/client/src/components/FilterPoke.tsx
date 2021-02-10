@@ -56,16 +56,15 @@ function FilterPoke({ filterType }: FilterPokeProps) {
   let isMore: boolean = false;
 
   let pokemon;
+  let pokemonData: any;
 
   if (loading === false) {
-    // const pokemonData = data.pokemonsByType;
-
-    const pokemonData =
-      filterType === 'byType' ? data.pokemonsByType : data.pokemons;
+    pokemonData = filterType === 'byType' ? data.pokemonsByType : data.pokemons;
     console.log('pokemonData', pokemonData);
-    // if (pokemonData.pageInfo.hasNextPage) {
-    //   isMore = true;
-    // }
+
+    if (pokemonData.pageInfo.hasNextPage) {
+      isMore = true;
+    }
 
     pokemon = pokemonData.edges.map((edge: PokemonEdge) => {
       return {
@@ -81,20 +80,21 @@ function FilterPoke({ filterType }: FilterPokeProps) {
     setSelType(selectedValue);
   }
 
-  // const handleLoadMore = () => {
-  //   const { endCursor } = data.pokemonsByType.pageInfo;
+  const handleLoadMore = () => {
+    const { endCursor } = pokemonData.pageInfo;
+    console.log(endCursor);
 
-  //   fetchMore({
-  //     variables: { after: endCursor },
-  //     updateQuery: (prevResult: any, { fetchMoreResult }) => {
-  //       fetchMoreResult.pokemonsByType.edges = [
-  //         ...prevResult.pokemonsByType.edges,
-  //         ...fetchMoreResult.pokemonsByType.edges,
-  //       ];
-  //       return fetchMoreResult;
-  //     },
-  //   });
-  // };
+    fetchMore({
+      variables: { after: endCursor },
+      updateQuery: (prevResult: any, { fetchMoreResult }) => {
+        fetchMoreResult.pokemonsByType.edges = [
+          ...prevResult.pokemonsByType.edges,
+          ...fetchMoreResult.pokemonsByType.edges,
+        ];
+        return fetchMoreResult;
+      },
+    });
+  };
 
   return (
     <>
@@ -126,7 +126,7 @@ function FilterPoke({ filterType }: FilterPokeProps) {
       <div className='PokeTable'>
         <PokeTable pokemons={pokemon} error={error} loading={loading} />
       </div>
-      {/* {isMore && <Button onClick={handleLoadMore}>Show More</Button>} */}
+      {isMore && <Button onClick={handleLoadMore}>Show More</Button>}
     </>
   );
 }
