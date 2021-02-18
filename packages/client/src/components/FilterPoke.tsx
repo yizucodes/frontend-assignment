@@ -15,23 +15,27 @@ interface FilterPokeProps {
 function FilterPoke({ filterType }: FilterPokeProps) {
   const [selType, setSelType] = useState<string>('Normal');
   const [searchText, setSearchText] = useState<string>('');
+  // const [after, setAfter] = useState<string>('');
 
   const FILTER_QUERY = () => {
     let query = filterType === 'byType' ? `"${selType}"` : `"${searchText}"`;
-    // let query = `"${selType}"`;
     console.log('query', query);
+
+    // if (after) {
+    //   query = query + `, after:"${after}"`;
+    // }
+
+    console.log(query);
 
     const queryParams =
       filterType === 'byName'
-        ? `pokemons(q:${query})`
-        : `pokemonsByType(type:${query})`;
+        ? `pokemons(q:${query}`
+        : `pokemonsByType(type:${query}`;
 
-    // const queryParams = `pokemonsByType(type:${query})`;
-
-    console.log('queryParams', queryParams);
+    console.log(queryParams);
 
     return gql`{
-      ${queryParams}{ 
+      ${queryParams}){ 
   
       edges{
         node{
@@ -82,7 +86,6 @@ function FilterPoke({ filterType }: FilterPokeProps) {
 
   const handleLoadMore = () => {
     const { endCursor } = pokemonData.pageInfo;
-    console.log(endCursor);
 
     fetchMore({
       variables: { after: endCursor },
